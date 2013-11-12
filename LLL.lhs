@@ -86,23 +86,28 @@
 > srff :: [Val] -> [Val]
 > srff ~[~(VB cs), ~(VB ss), ~(VB rs)] = [VB (go B0 cs B0 (B0, B0) ss rs)]
 >   where
->     go B0 (B1 : cs) q _ (s : ss) (r : rs) = q : go B1 cs q (s, r) ss rs
->     go B1 (B0 : cs) q sr (_ : ss) (_ : rs) = q' : go B0 cs q' sr ss rs where
+>     go c cs q sr ss rs = q : mo c cs q sr ss rs
+>     mo B0 (B1 : cs) q _ (s : ss) (r : rs) = go B1 cs q (s, r) ss rs
+>     mo B1 (B0 : cs) q sr (_ : ss) (_ : rs) = go B0 cs q' sr ss rs where
 >       q' = case (sr, q) of
 >              ((B0, B0), q) -> q
 >              ((B1, B0), q) -> B1
 >              ((B0, B1), q) -> B0
 >              ((B1, B1), q) -> BU
->     go _ (c : cs) q sr (_ : ss) (_ : rs) = q : go c cs q sr ss rs
->     go _ _ _ _ _ _ = []
+>     mo _ (c : cs) q sr (_ : ss) (_ : rs) = go c cs q sr ss rs
+>     mo _ _ _ _ _ _ = []
+
+> clock :: Val
+> clock = VB (cycle [B1, B0])
 
 > myGEnv :: [(String, Val)]
-> myGEnv =  [  ("and",   VF "and" andy)
->           ,  ("xor",   VF "xor" xory)
->           ,  ("d0c",   VF "d0c" dexp)
->           ,  ("csr",   VF "csr" srff)
->           ,  ("t0c",   VF "t0c" (oxford myGEnv myT))
->           ,  ("c4",    VF "c4"  (oxford myGEnv myC4))
+> myGEnv =  [  ("and",    VF "and" andy)
+>           ,  ("xor",    VF "xor" xory)
+>           ,  ("d0c",    VF "d0c" dexp)
+>           ,  ("csr",    VF "csr" srff)
+>           ,  ("t0c",    VF "t0c" (oxford myGEnv myT))
+>           ,  ("c4",     VF "c4"  (oxford myGEnv myC4))
+>           ,  ("clock",  VF "clock" (const [clock]))
 >           ]
 
 > myT :: Prog String String
@@ -120,9 +125,6 @@
 >           ]
 >        ,  [Def "q3", Def "q2", Def "q1", Def "q0"]
 >        )
-
-> clock :: Val
-> clock = VB (cycle [B1, B0])
 
 > till :: Int -> Val
 > till t = VB [b | i <- [0..t], b <- [B1, B0]]

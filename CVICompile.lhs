@@ -313,6 +313,7 @@
 >   case deFlex (ds, es) of
 >     Left w -> barf (DBarf (f, "Something's not connected up!"))
 >     Right p -> do
+>       -- True <- return $ trace (f ++ show p) True
 >       glos <- globs <$> stuf
 >       -- should check latency
 >       define f (VF f (oxford (gEnv glos) p)) ss lts
@@ -325,6 +326,7 @@
 >           ,  ("csr",   (VF "csr" srff, [B, B, B], [(1, B)]))
 >           ,  ("t0c",   (VF "t0c" (oxford myGEnv myT), [B, B], [(1, B)]))
 >           ,  ("c4",    (VF "c4"  (oxford myGEnv myC4), [] , replicate 4 (1,B) ))
+>           ,  ("clock",  (VF "clock" (const [clock]), [], [(0,B)]))
 >           ]
 
 > compile :: [(String, Glob)] -> [(String, Raw)] -> Either Barf [(String, Glob)]
